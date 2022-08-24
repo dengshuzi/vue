@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h2>学生姓名: {{name}}</h2>
+    <h2 @click="showName">学生姓名: {{name}}</h2>
     <h2>学校性别: {{sex}}</h2>
-    <input type="text" v-fbind:value="name">
   </div>
 </template>
 
 <script>
+  // import {mixin, minxin2} from '../mixin'
   export default {
     name: 'Student',
     data() {
@@ -15,5 +15,6 @@
         sex: '男'
       }
     },
+    // mixins: [mixin, minxin2]
   }
 </script>
