@@ -40,7 +40,7 @@
       (1).全局混入: Vue.mixin(xxx)
       (2).局部混入: mixins: ['xxx']
 
-# 插件
+## 插件
   功能: 用于增强Vue
   本质：包含install方法的一个对象, install的第一个参数是Vue, 第二个参数是插件使用者传递的数据
   定义插件:
@@ -59,3 +59,7 @@
       Vue.prototype.$myProperty = xxx
     }
   使用插件: Vue.use()
+
+## scoped
+  作用: 让样式在局部生效, 防止冲突
+  写法: <style scoped>
