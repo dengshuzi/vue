@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
-import App from './App.vue' 
-import store from './store'
-const app = createApp(App)
-app.use(store).mount('#app')
+// App
+import App from './App.vue'
+// 引入路由器
+import router from './router'
+
+createApp(App).use(router).mount('#app')
