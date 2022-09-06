@@ -556,7 +556,76 @@ model.exports = {
 
   > 备注: mapActions与mapMutations使用时, 若需要传递参数需要: 在模板中绑定事件时传递好参数, 否则参数是事件对象
 
-### mapActions与mapMutations使用时
+### 7.模块化+命名空间
+
+1. 目的：让代码更好维护，让多种数据分类更加明确。
+
+2. 修改```store.js```
+
+   ```javascript
+   const countAbout = {
+     namespaced:true,//开启命名空间
+     state:{x:1},
+     mutations: { ... },
+     actions: { ... },
+     getters: {
+       bigSum(state){
+          return state.sum * 10
+       }
+     }
+   }
+   
+   const personAbout = {
+     namespaced:true,//开启命名空间
+     state:{ ... },
+     mutations: { ... },
+     actions: { ... }
+   }
+   
+   const store = new Vuex.Store({
+     modules: {
+       countAbout,
+       personAbout
+     }
+   })
+   ```
+
+3. 开启命名空间后，组件中读取state数据：
+
+   ```js
+   //方式一：自己直接读取
+   this.$store.state.personAbout.list
+   //方式二：借助mapState读取：
+   ...mapState('countAbout',['sum','school','subject']),
+   ```
+
+4. 开启命名空间后，组件中读取getters数据：
+
+   ```js
+   //方式一：自己直接读取
+   this.$store.getters['personAbout/firstPersonName']
+   //方式二：借助mapGetters读取：
+   ...mapGetters('countAbout',['bigSum'])
+   ```
+
+5. 开启命名空间后，组件中调用dispatch
+
+   ```js
+   //方式一：自己直接dispatch
+   this.$store.dispatch('personAbout/addPersonWang',person)
+   //方式二：借助mapActions：
+   ...mapActions('countAbout',{incrementOdd:'jiaOdd',incrementWait:'jiaWait'})
+   ```
+
+6. 开启命名空间后，组件中调用commit
+
+   ```js
+   //方式一：自己直接commit
+   this.$store.commit('personAbout/ADD_PERSON',person)
+   //方式二：借助mapMutations：
+   ...mapMutations('countAbout',{increment:'JIA',decrement:'JIAN'}),
+   ```
+
 
 ## 路由
 
@@ -612,3 +681,185 @@ model.exports = {
   3. 每个组件都有自己的```$route```属性, 里面存储着自己的路由信息
 
   4. 整个应用只有一个router, 可以通过组件的```$router```属性获取到
+
+### 3. 多级路由(嵌套路由)
+
+  1. 配置路由规则, 使用children配置项:
+      ```js
+      routes: [
+        {
+          path: '/about',
+          component: About
+        },
+        {
+          path: '/home',
+          component: Home,
+          children: [
+            {
+              path: 'news',  //此处一定不要写: /news
+              component: News
+            },
+            {
+              path: 'message',  //此处一定不要写: /message
+              component: Message
+            }
+          ]
+        }
+      ]
+      ```
+
+  2. 跳转(要写完整路径):
+      ```js
+      <router-link to="/home/news">News</router-link>
+      ```
+
+### 4. 路由的query参数
+
+  1. 传递参数
+      ```js
+      <!-- 跳转并携带query参数, to的字符串写法 -->
+      <router-link :to="`/home/message/detail?id=${m.id}&title=${m.title}`">跳转</router-link>
+
+      <!-- 跳转并携带query参数, to的对象写法 -->
+      <router-link
+        :to="{
+          path: '/home/message/detail',
+          query: {
+            id: m.id,
+            title: m.title
+          }
+        }"
+      >跳转</router-link>
+      ```
+
+  2. 接收参数:
+      ```js
+      $route.query.id
+      $route.query.title
+      ```
+
+### 5. 命名路由
+1. 作用: 可以简化路由的跳转
+
+2. 如何使用
+
+  1. 给路由命名
+    ```js
+    {
+      path: 'demo',
+      component: Demo,
+      children: [
+        {
+          path: 'test',
+          component: Test,
+          children: [
+            {
+              name: 'hello',   //给路由命名
+              path: 'welcome',
+              component: Hello
+            }
+          ]
+        }
+      ]
+    }
+    ```
+
+  2. 简化跳转:
+    ```js
+    <!-- 简化前, 需要写完整的路径 -->
+    <router-link to="/welcome/test/welcome">跳转</router-link>
+
+    <!-- 简化后, 直接通过名字跳转 -->
+    <router-link to="{name: 'hello'}">跳转</router-link>
+
+    <!-- 简化写法配合传递参数 -->
+    <router-link
+      :to="{
+        name: 'hello',
+        query: {
+          id: 666,
+          title: '你好'
+        }
+      }"
+    >
+      跳转
+    </router-link>
+    ```
+
+### 6. 路由的params参数
+
+1. 配置路由, 生命接收params参数
+    ```js
+    {
+      path: '/home',
+      component: Home,
+      children: [
+        {
+          path: 'news',
+          component: News
+        },
+        {
+          path: 'message',
+          component: Message,
+          children: [
+            name: 'xiangqing',
+            path: 'detail/:id/:title',  //使用占位符生命接收params参数
+            component: Detail
+          ]
+        }
+      ]
+    }
+    ```
+
+2. 传递参数
+    ```js
+    <!-- 跳转并携带params参数， to的字符串写法 -->
+    <router-link :to="/home/message/detail/666/你好">跳转</router-link>
+
+    <!-- 跳转并携带params参数, to的对象写法 -->
+    <router-link
+      :to = "{
+        name: 'xiangqing',
+        params: {
+          id: 666,
+          title: '你好'
+        }
+      }"
+    >
+      跳转
+    </router-link>
+    ```
+
+    > 特别注意: 路由携带params参数时, 若使用to的对象写法, 则不能使用path配置项, 必须使用name配置
+
+3. 接收参数：
+    ```js
+    $route.params.id
+    $route.params.title
+    ```
+
+### 7. 路由的props配置
+
+作用: 让路由组件更方便的收到参数
+
+  ```js
+  {
+    name: 'xiangqing',
+    patrh: '/detail:id',   
+    component: Detail
+
+    // 第一种写法: props值为对象, 该对象中所有的key-value的组合最终都会通过props传给Detail组件
+    // props:{a:900}
+
+    // 第二种写法： props值为布尔值, 布尔值为true, 则把路由收到的所有params参数通过props传给Detail组件
+    // props: true
+
+    // 第三种写法: prop值为函数, 该函数返回的对象中每一组key-value的组合最终都会通过props传给Detail组件
+    props(route) {
+      return {
+        id: route.query.id,
+        title: route.query.title
+      }
+    }
+  }
+  ```
