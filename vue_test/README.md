@@ -743,48 +743,48 @@ model.exports = {
 
 2. 如何使用
 
-  1. 给路由命名
-    ```js
-    {
-      path: 'demo',
-      component: Demo,
-      children: [
-        {
-          path: 'test',
-          component: Test,
-          children: [
-            {
-              name: 'hello',   //给路由命名
-              path: 'welcome',
-              component: Hello
+    1. 给路由命名
+      ```js
+      {
+        path: 'demo',
+        component: Demo,
+        children: [
+          {
+            path: 'test',
+            component: Test,
+            children: [
+              {
+                name: 'hello',   //给路由命名
+                path: 'welcome',
+                component: Hello
+              }
+            ]
+          }
+        ]
+      }
+      ```
+
+      2. 简化跳转:
+        ```js
+        <!-- 简化前, 需要写完整的路径 -->
+        <router-link to="/welcome/test/welcome">跳转</router-link>
+
+        <!-- 简化后, 直接通过名字跳转 -->
+        <router-link to="{name: 'hello'}">跳转</router-link>
+
+        <!-- 简化写法配合传递参数 -->
+        <router-link
+          :to="{
+            name: 'hello',
+            query: {
+              id: 666,
+              title: '你好'
             }
-          ]
-        }
-      ]
-    }
-    ```
-
-  2. 简化跳转:
-    ```js
-    <!-- 简化前, 需要写完整的路径 -->
-    <router-link to="/welcome/test/welcome">跳转</router-link>
-
-    <!-- 简化后, 直接通过名字跳转 -->
-    <router-link to="{name: 'hello'}">跳转</router-link>
-
-    <!-- 简化写法配合传递参数 -->
-    <router-link
-      :to="{
-        name: 'hello',
-        query: {
-          id: 666,
-          title: '你好'
-        }
-      }"
-    >
-      跳转
-    </router-link>
-    ```
+          }"
+        >
+          跳转
+        </router-link>
+        ```
 
 ### 6. 路由的params参数
 
@@ -863,3 +863,60 @@ model.exports = {
     }
   }
   ```
+
+### 8. ```<router-link>```的replace属性
+
+1. 作用: 控制路由跳转时操作浏览器历史记录的模式
+
+2. 浏览器的历史记录有两种写入模式: 分别为```push```和```replace```, ```push```是追加历史记录, ```replace```是替换当前记录。路由跳转的时候默认为```push```
+
+3. 如何开启replace模式: ```<router-link replace ......>News</router-link>```
+
+### 9. 编程时路由导航
+
+1. 作用: 不借助```<router-link>```实现路由跳转, 让路由跳转更灵活
+
+2. 具体编码:
+    ```js
+    //$router的两个API
+    this.$router.push({
+      name: 'xiangqing',
+      params: {
+        id: xxx,
+        title: xxx
+      }
+    })
+
+    this.$router.replace({
+      name: 'xiangqing',
+      params: {
+        id: xxx,
+        title: xxx
+      }
+    })
+
+    this.$router.forward() //前进
+    this.$router.back() //后退
+    this.$router.go() //可前进也可后退
+    ```
+
+### 10. 缓存路由组件
+
+1. 作用: 让不展示的路由组件保持挂载, 不被销毁
+
+2. 具体代码:
+    ```js
+    <keep-alive include="News">
+      <router-view></router-view>
+    </keep-alive>
+    ```
+
+### 11. 两个新的生命周期钩子
+
+1. 作用: 路由组件独有的两个钩子, 用于捕获路由组件的激活状态
+
+2. 具体名字:
+
+    1. ```activated```路由组件被激活时触发
+
+    2. ```deactivated```路由组件失活时触发
