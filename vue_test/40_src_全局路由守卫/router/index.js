@@ -10,15 +10,12 @@ import Detail from '../pages/Detail.vue'
 //创建并暴露一个路由器
 const router = new createRouter({
   history: createWebHistory(),
-  // mode: 'history',
-  mode: 'hash',
   routes: [
     {
       name: 'guanyu',
       path: '/about',
       component: About,
       meta: {
-        isAuth: true,
         title: '关于'
       }
     },
@@ -38,17 +35,6 @@ const router = new createRouter({
             isAuth: true,
             title: '新闻'
           },
-          /* beforeEnter: (to, from ,next) => {
-            if (to.meta.isAuth) { //判断是否序号鉴权
-              if(localStorage.getItem('school') === 'lnnt1') {
-                next()
-              } else {
-                alert('学校名不对无权限查看')
-              }
-            } else {
-              next()
-            } 
-          } */
         },
         {
           name: 'xiaoxi',
@@ -79,7 +65,7 @@ const router = new createRouter({
 })
 
 //全局前置路由守卫——初始化的时候被调用, 每次路由切换之前被调用
-/* router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {
   console.log('前置路由守卫', to, from);
   if (to.meta.isAuth) { //判断是否序号鉴权
     if(localStorage.getItem('school') === 'lnnt1') {
@@ -90,7 +76,7 @@ const router = new createRouter({
   } else {
     next()
   }
-}) */
+})
 
 //全局后置路由守卫——初始化的时候被调用, 每次路由切换之后被调用
 router.afterEach((to, from) => {

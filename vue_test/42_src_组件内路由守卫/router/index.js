@@ -10,8 +10,6 @@ import Detail from '../pages/Detail.vue'
 //创建并暴露一个路由器
 const router = new createRouter({
   history: createWebHistory(),
-  // mode: 'history',
-  mode: 'hash',
   routes: [
     {
       name: 'guanyu',
