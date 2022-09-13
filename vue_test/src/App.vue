@@ -1,39 +1,32 @@
 <template>
   <div>
-    <div class="row">
-      <div class="col-xs-offset-2 col-xs-8">
-				<Banner/>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-xs-2 col-xs-offset-2">
-        <div class="list-group">
-					<!-- 原始html中我们使用a标签实现页面跳转 -->
-          <!-- <a class="list-group-item active" href="./about.html">About</a>
-          <a class="list-group-item" href="./home.html">Home</a> -->
-
-					<!-- Vue中借助router-link标签实现路由的切换 -->
-					<router-link class="list-group-item" active-class="active" to="/about">About</router-link>
-					<router-link class="list-group-item" active-class="active" to="/home">Home</router-link>
-        </div>
-      </div>
-      <div class="col-xs-6">
-        <div class="panel">
-          <div class="panel-body">
-						<!-- 指定组件的呈现位置 -->
-						<router-view></router-view>
-          </div>
-        </div>
+    <button>原生的按钮</button>
+    <input type="text">
+    <el-row class="mb-4">
+    <el-button>Default</el-button>
+      <el-button type="primary">Primary</el-button>
+      <el-button type="success">Success</el-button>
+      <el-button type="info">Info</el-button>
+      <el-button type="warning">Warning</el-button>
+      <el-button type="danger">Danger</el-button>
+    </el-row>
+    <div class="demo-date-picker">
+      <div class="block">
+        <span class="demonstration">Default</span>
+        <el-date-picker
+          v-model="value1"
+          type="date"
+          placeholder="Pick a day"
+          :size="size"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-	import Banner from './components/Banner.vue'
 	export default {
-    name: "App",
-		components: { Banner }
+    name: "App"
 	}
 </script>
 <style scoped>
