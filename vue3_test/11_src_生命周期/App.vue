@@ -1,6 +1,7 @@
 <template>
   <div>
-    <Demo/>
+    <button @click="isShowDemo = !isShowDemo">切换隐藏/显示</button>
+    <Demo v-if="isShowDemo"/>
   </div>
 </template>
 
