@@ -115,7 +115,7 @@ npm run dev
         - Vue2.x配置(data, methods, computed...)中<strong style="color:#DD5145">可以访问到</strong>setup中的属性, 方法
         - 但在setup中<strong style="color:#DD5145">不能访问到</strong>Vue2.x配置(data, methods, computed...)
         - 如果有重名, setup优先
-    2. setup不能是一个async函数, 因为返回值不再是return的对象, 而是promise, 模板看不到return对象中的属性
+    2. setup不能是一个async函数, 因为返回值不再是return的对象, 而是promise, 模板看不到return对象中的属性(后期也可可以返回一个Promise实例, 但需要Suspense和异步组件的配合)
 
 ## 2. ref函数
 
@@ -343,3 +343,266 @@ setup() {
 
 ## 4. customRef
 
+- 作用: 创建一个自定义的ref, 并对其依赖项跟踪和更新触发进行显示控制
+- 实现防抖效果:
+```js
+<template>
+  <div>
+    <input type="text" v-model="keyword">
+    <h3>{{keyword}}</h3>
+  </div>
+</template>
+
+<script>
+  import {ref, customRef} from 'vue'
+  export default {
+    name: 'Demo',
+    setup() {
+      // let keyword = ref('hello') // 使用Vue准备好的内置ref
+      // 自定义一个myRef
+      function myRef(value, delay) {
+        let timer
+        // 通过customRef去实现自定义
+        return customRef((track, trigger)=>{
+          return {
+            get(value) {
+              track() // 告诉Vue这个value值是需要被追踪的
+              return value
+            },
+            set(newValue) {
+              clearTimeout(timer)
+              timer = setTimeout(()=>{
+                value = newValue
+                trigger() // 告诉Vue去更新界面
+              }, delay)
+            }
+          }
+        })
+      }
+      let keyword = myRef('hello', 500) // 使用自定义的ref
+    }
+  }
+</script>
+```
+
+## 5.provide 与 inject
+
+- 作用: 实现<strong style="color:#DD5145">祖后代组件间</strong>通信
+- 套路: 父组件有一个```provide```选项来提供数据, 后代组件有一个```inject```选项来开始使用这些数据
+- 具体写法:
+  1. 祖组件中:
+      ```js
+      setup() {
+        ......
+        let car = reactive({name: '奔驰', price: '40万'})
+        provide(car)
+        ......
+      }
+      ```
+
+  2. 孙组件中:
+      ```js
+      setup(props, context) {
+        ......
+        const car = inject('car')        
+        return {car}
+        ......
+      }
+      ```
+
+## 6. 响应式数据的判断
+
+- isRef: 检查一个值是否为一个ref对象
+- isReactive: 检查一个对象是否由```reactive```创建的响应式代理
+- isReadonly： 检查一个对象是否由```readonly```创建的只读代理
+- isProxy: 检查一个对象是否由```reactive```或者```readonly```方法创建的代理
+
+# 四、 Composition API的优势
+
+## 1. Options API存在的问题
+使用传统的OptionsAPI中, 新增或者修改一个需求, 就需要分别在data, methods, computed里修改
+
+<div style="width:600px;height:370px;overflow:hidden;float:left">
+    <img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f84e4e2c02424d9a99862ade0a2e4114~tplv-k3u1fbpfcp-watermark.image" style="width:600px;float:left" />
+</div>
+<div style="width:300px;height:370px;overflow:hidden;float:left">
+    <img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e5ac7e20d1784887a826f6360768a368~tplv-k3u1fbpfcp-watermark.image" style="zoom:50%;width:560px;left" /> 
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 2. Composition API的优势
+
+我们可以更加优雅的组织我们的代码，函数。让相关功能的代码更加有序的组织在一起。
+
+<div style="width:500px;height:340px;overflow:hidden;float:left">
+    <img src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bc0be8211fc54b6c941c036791ba4efe~tplv-k3u1fbpfcp-watermark.image"style="height:360px"/>
+</div>
+<div style="width:430px;height:340px;overflow:hidden;float:left">
+    <img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6cc55165c0e34069a75fe36f8712eb80~tplv-k3u1fbpfcp-watermark.image"style="height:360px"/>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 五、新的组件
+
+## 1.Fragment
+
+- 在Vue2中: 组件必须有一个根标签
+- 在Vue3中: 组件可以没有根标签, 内部会将多个标签包含在一个Fragment虚拟元素中
+- 好处: 减少标签层级, 减小内存占用
+
+## 2. Teleport
+
+- 什么是Teleport?——```Teleport```是一种能够将我们的<strong style="color:#DD5145">组件html结构</strong>移动到制定位置的技术
+
+  ```vue
+  <teleport to="移动位置">
+  	<div v-if="isShow" class="mask">
+  		<div class="dialog">
+  			<h3>我是一个弹窗</h3>
+  			<button @click="isShow = false">关闭弹窗</button>
+  		</div>
+  	</div>
+  </teleport>
+  ```
+
+## 3. Suspense
+
+- 等待异步组件时渲染一些额外内容, 让应用有更好的用户体验
+- 使用步骤:
+    - 异步引入组件
+      ```js
+      import {defineAsyncComponent} from 'vue'
+      const Child = defineAsyncComponent(()=>import('./components/Child.vue'))
+      ```
+    - 使用```Suspense```包裹组件, 并配置好```default```与```fallback```
+      ```js
+      <template>
+        <div class="app">
+          <h3>我是App组件</h3>
+          <Suspense>
+            <template v-slot:default>
+              <Child/>
+            </template>
+            <template v-slot:fallback>
+              <h3>加载中...</h3>
+            </template>
+          </Suspense>
+        </div>
+      </template
+      ```
+
+# 六、 其他
+
+## 1. 全局API的转移
+- Vue2.x有许多全局API和配置
+    - 例如: 注册全局组件, 注册全局指令等
+    ```js
+    // 注册全局组件
+    Vue.component('MyButton', {
+      data:() => ({
+        count: 0
+      }),
+      template: '<button @click="count++">Clicked {{count}} times.</button>'
+    })
+
+    // 注册全局指令
+    Vue.directive('focus', {
+      inserted: el => el.focus()
+    })
+    ```
+
+- Vue3.0中对这些API做出了调整：
+
+  - 将全局的API，即：```Vue.xxx```调整到应用实例（```app```）上
+
+    | 2.x 全局 API（```Vue```） | 3.x 实例 API (`app`)                        |
+    | ------------------------- | ------------------------------------------- |
+    | Vue.config.xxxx           | app.config.xxxx                             |
+    | Vue.config.productionTip  | <strong style="color:#DD5145">移除</strong> |
+    | Vue.component             | app.component                               |
+    | Vue.directive             | app.directive                               |
+    | Vue.mixin                 | app.mixin                                   |
+    | Vue.use                   | app.use                                     |
+    | Vue.prototype             | app.config.globalProperties                 | 
+
+## 2. 其他改变
+
+- data选项始终被声明为一个函数
+- 过渡类名的更改:
+    - Vue2.x写法
+        ```js
+        .v-enter,
+        .v-leave-to {
+          opacity: 0;
+        }
+        .v-leave,
+        .v-enter-to {
+          opacity: 1;
+        }
+        ```
+
+    - Vue3.0写法
+        ```js
+        .v-enter,-from,
+        .v-leave-to {
+          opacity: 0;
+        }
+        .v-leave-from,
+        .v-enter-to {
+          opacity: 1;
+        }
+        ```
+
+- <strong style="color:#DD5145">移除</strong>keyCode作为v-on的修饰符, 同时再也不支持```config.keyCodes```
+- <strong style="color:#DD5145">移除</strong>```v-on.native```修饰符
+    - 父组件中绑定时间
+        ```js
+        <my-component
+          v-on:close="handleComponentEvent"
+          v-on:click="handleNativeClickEvent"
+        />
+        ```
+    - 子组件声明自定义事件
+        ```js
+        <script>
+          export default {
+            emits: ['close']
+          }
+        </script>
+        ```
+
+- <strong style="color:#DD5145">移除</strong>过滤器(filter)
+> 过滤器虽然看起来很方便, 但它需要一个自定义语法, 打破大括号内表达式是"JavaScript"的假设, 这不仅有学习成本, 而且有实现成本! 建议用方法调用或计算属性去替换过滤器
+
+- ......
